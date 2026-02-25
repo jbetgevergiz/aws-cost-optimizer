@@ -1,0 +1,21 @@
+name: Test Vercel Token
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test token validity
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "Testing Vercel API token..."
+          echo "Token exists: $([ -n "$VERCEL_TOKEN" ] && echo 'YES' || echo 'NO')"
+          echo "Project ID: $VERCEL_PROJECT_ID"
+          
+          # Try to get user info  
+          curl -v -X GET "https://api.vercel.com/v2/user" \
+            -H "Authorization: Bearer $VERCEL_TOKEN"
