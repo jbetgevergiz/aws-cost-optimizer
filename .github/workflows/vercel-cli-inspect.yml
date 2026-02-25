@@ -1,0 +1,30 @@
+name: Vercel CLI Inspect
+
+on:
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Use Vercel CLI to inspect project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        working-directory: frontend
+        run: |
+          npm install -g vercel
+          
+          echo "=== Vercel CLI Version ===" 
+          vercel --version
+          
+          echo ""
+          echo "=== Project Inspect ===" 
+          vercel project inspect --token "$VERCEL_TOKEN" 2>&1 || true
+          
+          echo ""
+          echo "=== Try list ===" 
+          vercel project list --token "$VERCEL_TOKEN" 2>&1 || true
