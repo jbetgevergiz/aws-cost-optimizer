@@ -1,0 +1,38 @@
+:root {
+  /* Colors */
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+  --color-cyan: #00FFFF;
+  --color-dark-gray: #1A1A1A;
+  --color-dark-gray-2: #2D2D2D;
+  --color-border: #333333;
+  
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  
+  /* Typography */
+  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+  --font-size-3xl: 48px;
+  
+  /* Transitions */
+  --transition-fast: 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-base: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-slow: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* Shadows */
+  --shadow-sm: 0 0 10px rgba(0, 255, 255, 0.1);
+  --shadow-md: 0 0 20px rgba(0, 255, 255, 0.2);
+  --shadow-lg: 0 0 30px rgba(0, 255, 255, 0.3);
+}
