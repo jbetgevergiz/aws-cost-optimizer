@@ -1,0 +1,33 @@
+name: Disable Vercel Deployment Protection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  disable-protection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Disable Deployment Protection
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          # Add the current deployment domain to Deployment Protection Exceptions
+          DOMAIN="frontend-hr3ntphz4-jasons-projects-c908ddc9.vercel.app"
+          
+          # Use Vercel API to add domain to exceptions
+          curl -X POST "https://api.vercel.com/v14/projects/$VERCEL_PROJECT_ID/protection/unprotected-domains" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"domain\":\"$DOMAIN\"}" \
+            -v
+          
+          # Alternative: Try to disable protection entirely via API
+          curl -X PATCH "https://api.vercel.com/v6/projects/$VERCEL_PROJECT_ID" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"protectionBypass": null}' \
+            -v || true
