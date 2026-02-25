@@ -9,25 +9,39 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Disable Deployment Protection
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+      
+      - name: Disable Deployment Protection via Vercel API
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          # Add the current deployment domain to Deployment Protection Exceptions
-          DOMAIN="frontend-hr3ntphz4-jasons-projects-c908ddc9.vercel.app"
+          set -x
           
-          # Use Vercel API to add domain to exceptions
-          curl -X POST "https://api.vercel.com/v14/projects/$VERCEL_PROJECT_ID/protection/unprotected-domains" \
+          # Get current project settings
+          echo "=== Fetching current project settings ==="
+          curl -s -X GET "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" | jq . > /tmp/project-before.json
+          
+          cat /tmp/project-before.json | jq '.protection'
+          
+          # Method 1: Try to disable protection via API - set protection to null
+          echo "=== Attempting to disable protection (Method 1) ==="
+          curl -X PATCH "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID" \
             -H "Authorization: Bearer $VERCEL_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "{\"domain\":\"$DOMAIN\"}" \
-            -v
+            -d '{"protection":null}' | jq . || true
           
-          # Alternative: Try to disable protection entirely via API
-          curl -X PATCH "https://api.vercel.com/v6/projects/$VERCEL_PROJECT_ID" \
+          # Method 2: Try to set protection level to "none"
+          echo "=== Attempting to disable protection (Method 2) ==="
+          curl -X PATCH "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID" \
             -H "Authorization: Bearer $VERCEL_TOKEN" \
             -H "Content-Type: application/json" \
-            -d '{"protectionBypass": null}' \
-            -v || true
+            -d '{"protection":{"type":"none"}}' | jq . || true
+          
+          # Verify the change
+          echo "=== Fetching updated project settings ==="
+          curl -s -X GET "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" | jq '.protection'
