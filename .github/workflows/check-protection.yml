@@ -1,0 +1,53 @@
+name: Check Vercel Protection Status
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if app is protected
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://frontend-hr3ntphz4-jasons-projects-c908ddc9.vercel.app)
+          echo "HTTP Status Code: $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" = "401" ]; then
+            echo "✗ App is PROTECTED (401 Unauthorized)"
+            exit 1
+          elif [ "$HTTP_CODE" = "200" ]; then
+            echo "✓ App is UNPROTECTED (200 OK)"
+            exit 0
+          else
+            echo "? Unknown status: $HTTP_CODE"
+            exit 2
+          fi
+      
+      - name: Check with bypass header (if available)
+        if: always()
+        env:
+          BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          if [ -z "$BYPASS_SECRET" ]; then
+            echo "No VERCEL_AUTOMATION_BYPASS_SECRET available"
+          else
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "x-vercel-protection-bypass: $BYPASS_SECRET" \
+              https://frontend-hr3ntphz4-jasons-projects-c908ddc9.vercel.app)
+            echo "HTTP Status with bypass header: $HTTP_CODE"
+          fi
+      
+      - name: Try Vercel API call
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "Token length: ${#VERCEL_TOKEN}"
+          echo "Project ID: $VERCEL_PROJECT_ID"
+          
+          # Try to get project info
+          curl -X GET "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            -H "Content-Type: application/json" \
+            -w "\nHTTP Status: %{http_code}\n" \
+            2>&1 | head -50
