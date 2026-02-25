@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavItem {
   label: string;
@@ -22,6 +23,11 @@ interface NavigationProps {
   className?: string;
 }
 
+const prefersReducedMotion = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};
+
 export const Navigation: React.FC<NavigationProps> = ({
   logo,
   logoText = 'AWS Cost Optimizer',
@@ -31,9 +37,44 @@ export const Navigation: React.FC<NavigationProps> = ({
   className = '',
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const reducedMotion = prefersReducedMotion();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const menuVariants = {
+    hidden: {
+      opacity: 0,
+      y: -20,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: reducedMotion ? 0.01 : 0.3,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      transition: {
+        duration: reducedMotion ? 0.01 : 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: (i: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: reducedMotion ? 0 : i * 0.05,
+        duration: reducedMotion ? 0.01 : 0.3,
+      },
+    }),
   };
 
   return (
@@ -83,64 +124,78 @@ export const Navigation: React.FC<NavigationProps> = ({
           )}
 
           {/* Mobile Menu Button */}
-          <button
+          <motion.button
             onClick={toggleMobileMenu}
             className="md:hidden p-2 rounded-base text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition-colors duration-fast"
             aria-label="Toggle menu"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: reducedMotion ? 0.01 : 0.15 }}
           >
-            <svg
-              className={`w-6 h-6 transition-transform duration-normal ${isMobileMenuOpen ? 'rotate-90' : ''}`}
+            <motion.svg
+              className="w-6 h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
+              transition={{ duration: reducedMotion ? 0.01 : 0.2 }}
             >
               {isMobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               )}
-            </svg>
-          </button>
+            </motion.svg>
+          </motion.button>
         </div>
 
         {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden pb-4 space-y-2 border-t border-border-light pt-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block px-4 py-2 rounded-base text-sm font-medium transition-colors duration-fast ${
-                  item.isActive
-                    ? 'text-primary bg-glass-light'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-            {ctaButton && (
-              <div className="px-4 pt-2">
-                {ctaButton.href ? (
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              className="md:hidden pb-4 space-y-2 border-t border-border-light pt-4 overflow-hidden"
+              variants={menuVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              {navItems.map((item, i) => (
+                <motion.div key={item.href} custom={i} variants={itemVariants} initial="hidden" animate="visible">
                   <Link
-                    href={ctaButton.href}
-                    className="block w-full text-center px-4 py-2 bg-primary hover:bg-primary-dark text-text-inverse rounded-base font-medium transition-all duration-fast"
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block px-4 py-2 rounded-base text-sm font-medium transition-colors duration-fast ${
+                      item.isActive
+                        ? 'text-primary bg-glass-light'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'
+                    }`}
                   >
-                    {ctaButton.text}
+                    {item.label}
                   </Link>
-                ) : (
-                  <button
-                    onClick={ctaButton.onClick}
-                    className="w-full px-4 py-2 bg-primary hover:bg-primary-dark text-text-inverse rounded-base font-medium transition-all duration-fast"
-                  >
-                    {ctaButton.text}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                </motion.div>
+              ))}
+              {ctaButton && (
+                <motion.div className="px-4 pt-2" custom={navItems.length} variants={itemVariants} initial="hidden" animate="visible">
+                  {ctaButton.href ? (
+                    <Link
+                      href={ctaButton.href}
+                      className="block w-full text-center px-4 py-2 bg-primary hover:bg-primary-dark text-text-inverse rounded-base font-medium transition-all duration-fast"
+                    >
+                      {ctaButton.text}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={ctaButton.onClick}
+                      className="w-full px-4 py-2 bg-primary hover:bg-primary-dark text-text-inverse rounded-base font-medium transition-all duration-fast"
+                    >
+                      {ctaButton.text}
+                    </button>
+                  )}
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );

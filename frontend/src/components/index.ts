@@ -7,6 +7,26 @@ export { Modal } from './Modal';
 export { Hero } from './Hero';
 export { Navigation } from './Navigation';
 
+// Animation Components - Framer Motion
+
+// Loading states
+export { Skeleton, type SkeletonVariant } from './Skeleton';
+export { Spinner, DotSpinner, type SpinnerSize } from './Spinner';
+export { ProgressBar, IndeterminateProgressBar } from './ProgressBar';
+
+// Data update animations
+export { CostTicker, NumberCounter } from './CostTicker';
+export { PulseAnimation, StaggeredSavingsList } from './SavingsAnimation';
+
+// Form validations
+export { ValidationError, SuccessMessage, ValidatedField } from './FormValidation';
+
+// Page transitions
+export { PageTransition, FadeIn, SlideInFromTop, SlideInFromBottom } from './PageTransition';
+
+// Notifications
+export { Toast, ToastContainer, type ToastType } from './Toast';
+
 // Dashboard Components
 export { MetricCard } from './MetricCard';
 export { RecommendationItem } from './RecommendationItem';
