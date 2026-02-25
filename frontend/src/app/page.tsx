@@ -1,97 +1,169 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import Link from 'next/link'
+import { useState } from 'react';
+import { Button, Card, CardBody, CardHeader, Input, Modal, Hero, Navigation } from '@/components';
 
-export default function LandingPage() {
+export default function Home() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
-    <main className="min-h-screen bg-black text-white font-mono">
+    <>
+      {/* Navigation */}
+      <Navigation
+        logoText="AWS Cost Optimizer"
+        navItems={[
+          { label: 'Features', href: '#features', isActive: false },
+          { label: 'Pricing', href: '#pricing', isActive: false },
+          { label: 'Documentation', href: '/docs', isActive: false },
+          { label: 'Blog', href: '/blog', isActive: false },
+        ]}
+        ctaButton={{
+          text: 'Get Started',
+          onClick: () => setIsModalOpen(true),
+        }}
+      />
+
       {/* Hero Section */}
-      <section className="h-screen flex flex-col justify-center items-start px-16 py-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h1 className="text-6xl font-bold mb-4 font-mono">
-            Find <span className="text-cyan-400">$1000s</span>
-            <br />
-            in Wasted AWS Spend
-          </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mb-8 leading-relaxed">
-            AWS cost analyzer built for startups. Get a free audit in 2 minutes.
-            Discover exactly where your money is going.
+      <Hero
+        title="Find $1000s in Wasted AWS Spend"
+        subtitle="AWS Cost Optimization"
+        description="Analyze your AWS costs in minutes and find unused resources, inefficient configurations, and quick savings opportunities."
+        primaryCTA={{
+          text: 'Start Free Analysis',
+          onClick: () => setIsModalOpen(true),
+        }}
+        secondaryCTA={{
+          text: 'Watch Demo',
+          onClick: () => console.log('Demo clicked'),
+        }}
+      />
+
+      {/* Component Showcase */}
+      <section className="bg-bg-primary py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-text-primary mb-12 text-center">Design System Components</h2>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            {/* Buttons */}
+            <Card variant="elevated">
+              <CardHeader>
+                <h3 className="text-2xl font-bold text-text-primary">Buttons</h3>
+              </CardHeader>
+              <CardBody>
+                <div className="space-y-4">
+                  <Button variant="primary">Primary Button</Button>
+                  <Button variant="secondary">Secondary Button</Button>
+                  <Button variant="outline">Outline Button</Button>
+                  <Button variant="ghost">Ghost Button</Button>
+                  <Button variant="danger">Danger Button</Button>
+                  <Button variant="primary" isLoading>
+                    Loading...
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* Cards */}
+            <Card variant="glass">
+              <CardHeader>
+                <h3 className="text-2xl font-bold text-text-primary">Card Variants</h3>
+              </CardHeader>
+              <CardBody>
+                <div className="space-y-3">
+                  <Card variant="default">
+                    <CardBody>Default Card</CardBody>
+                  </Card>
+                  <Card variant="elevated">
+                    <CardBody>Elevated Card</CardBody>
+                  </Card>
+                  <Card variant="hover">
+                    <CardBody>Hover Card (interactive)</CardBody>
+                  </Card>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Forms */}
+          <Card variant="elevated" className="mb-12">
+            <CardHeader>
+              <h3 className="text-2xl font-bold text-text-primary">Form Inputs</h3>
+            </CardHeader>
+            <CardBody className="space-y-6">
+              <Input label="Email Address" type="email" placeholder="you@example.com" />
+              <Input
+                label="Password"
+                type="password"
+                placeholder="Enter password"
+                error="Password must be at least 8 characters"
+              />
+              <Input
+                label="API Key"
+                type="text"
+                placeholder="aws-****"
+                helperText="Your API key is encrypted and stored securely"
+              />
+            </CardBody>
+          </Card>
+
+          {/* Sizes and States */}
+          <Card variant="default">
+            <CardHeader>
+              <h3 className="text-2xl font-bold text-text-primary">Button Sizes & Widths</h3>
+            </CardHeader>
+            <CardBody className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-text-secondary text-sm">Small</label>
+                <Button size="sm">Small Button</Button>
+              </div>
+              <div className="space-y-2">
+                <label className="text-text-secondary text-sm">Medium</label>
+                <Button size="md">Medium Button</Button>
+              </div>
+              <div className="space-y-2">
+                <label className="text-text-secondary text-sm">Large</label>
+                <Button size="lg">Large Button</Button>
+              </div>
+              <div className="space-y-2">
+                <label className="text-text-secondary text-sm">Full Width</label>
+                <Button fullWidth>Full Width Button</Button>
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+      </section>
+
+      {/* Modal Test */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Get Started with AWS Cost Optimizer"
+        size="lg"
+        footer={
+          <div className="flex gap-4 justify-end">
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={() => setIsModalOpen(false)}>
+              Continue
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-text-secondary">
+            Connect your AWS account to start analyzing your costs. We'll scan your infrastructure in real-time.
           </p>
-        </motion.div>
-
-        {/* CTA Buttons */}
-        <motion.div
-          className="flex gap-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Link href="/auth/signin">
-            <button className="px-8 py-4 bg-cyan-400 text-black font-bold hover:bg-cyan-300 transition">
-              START FREE AUDIT
-            </button>
-          </Link>
-          <Link href="/login">
-            <button className="px-8 py-4 border border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black transition">
-              LOGIN
-            </button>
-          </Link>
-        </motion.div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-32 px-16 border-t border-gray-800">
-        <h2 className="text-4xl font-bold mb-16">What You'll Find</h2>
-        <div className="grid grid-cols-3 gap-16">
-          {[
-            { label: 'EC2 Waste', desc: 'Idle & oversized instances' },
-            { label: 'RDS Waste', desc: 'Underutilized databases' },
-            { label: 'Storage Waste', desc: 'Unused S3 buckets & volumes' },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              className="p-6 bg-gray-900 border border-gray-700 hover:border-cyan-400 transition"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <p className="text-cyan-400 font-bold mb-2">{item.label}</p>
-              <p className="text-gray-400">{item.desc}</p>
-            </motion.div>
-          ))}
+          <Input label="AWS Account ID" placeholder="123456789012" />
         </div>
-      </section>
+      </Modal>
 
-      {/* Pricing */}
-      <section className="py-32 px-16 border-t border-gray-800">
-        <h2 className="text-4xl font-bold mb-16">Pricing</h2>
-        <div className="grid grid-cols-2 gap-8 max-w-4xl">
-          <div className="p-8 border border-gray-700">
-            <h3 className="text-2xl font-bold mb-4">Free</h3>
-            <p className="text-cyan-400 text-3xl font-bold mb-4">$0</p>
-            <ul className="text-gray-400 space-y-2">
-              <li>✓ One-time audit</li>
-              <li>✓ Cost breakdown</li>
-              <li>✓ Basic recommendations</li>
-            </ul>
-          </div>
-          <div className="p-8 border border-cyan-400 bg-cyan-400/5">
-            <h3 className="text-2xl font-bold mb-4">Premium</h3>
-            <p className="text-cyan-400 text-3xl font-bold mb-4">$49<span className="text-lg">/mo</span></p>
-            <ul className="text-gray-400 space-y-2">
-              <li>✓ Live cost monitoring</li>
-              <li>✓ Advanced remediation</li>
-              <li>✓ Scheduled audits</li>
-              <li>✓ Slack integration</li>
-            </ul>
-          </div>
+      {/* Footer */}
+      <footer className="bg-bg-secondary border-t border-border-light py-12 px-4">
+        <div className="max-w-7xl mx-auto text-center text-text-tertiary">
+          <p>&copy; 2025 AWS Cost Optimizer. All rights reserved.</p>
         </div>
-      </section>
-    </main>
-  )
+      </footer>
+    </>
+  );
 }
