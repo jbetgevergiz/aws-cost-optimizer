@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 export type InputType = 'text' | 'email' | 'password' | 'number' | 'search' | 'url';
 export type InputSize = 'sm' | 'md' | 'lg';
@@ -19,6 +20,11 @@ const sizeStyles: Record<InputSize, string> = {
   lg: 'px-6 py-3 text-lg',
 };
 
+const prefersReducedMotion = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};
+
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
@@ -34,8 +40,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     const [isFocused, setIsFocused] = useState(false);
+    const [hasValue, setHasValue] = useState(!!props.defaultValue);
+    const reducedMotion = prefersReducedMotion();
 
-    const baseStyles = 'w-full rounded-base border-2 bg-bg-secondary text-text-primary placeholder-text-tertiary transition-colors duration-200';
+    const baseStyles = 'w-full rounded-base border-2 bg-bg-secondary text-text-primary placeholder-text-tertiary';
     const borderStyle = error
       ? 'border-error focus:border-error focus:outline-none'
       : 'border-border-light focus:border-primary focus:outline-none focus:shadow-md';
@@ -49,20 +57,26 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(false);
+      setHasValue(!!e.target.value);
       props.onBlur?.(e);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setHasValue(!!e.target.value);
+      props.onChange?.(e);
     };
 
     return (
       <div className="w-full">
         {label && (
-          <label
-            className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
-              isFocused ? 'text-primary' : 'text-text-primary'
-            }`}
+          <motion.label
+            className="block text-sm font-medium text-text-primary mb-2"
+            animate={{ color: isFocused ? '#d4af37' : '#ffffff' }}
+            transition={{ duration: reducedMotion ? 0.01 : 0.15 }}
           >
             {label}
             {props.required && <span className="text-error ml-1">*</span>}
-          </label>
+          </motion.label>
         )}
         <div className="relative">
           {icon && <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-tertiary">{icon}</div>}
@@ -72,18 +86,29 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className={`${baseStyles} ${borderStyle} ${disabledStyle} ${iconPadding} ${sizeStyles[inputSize]} ${className}`}
             onFocus={handleFocus}
             onBlur={handleBlur}
+            onChange={handleChange}
             {...props}
           />
         </div>
         {error && (
-          <p className="text-error text-sm mt-1">
+          <motion.p
+            className="text-error text-sm mt-1"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: reducedMotion ? 0.01 : 0.2 }}
+          >
             {error}
-          </p>
+          </motion.p>
         )}
         {helperText && !error && (
-          <p className="text-text-tertiary text-sm mt-1">
+          <motion.p
+            className="text-text-tertiary text-sm mt-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: reducedMotion ? 0.01 : 0.3 }}
+          >
             {helperText}
-          </p>
+          </motion.p>
         )}
       </div>
     );
@@ -114,8 +139,9 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     ref
   ) => {
     const [isFocused, setIsFocused] = useState(false);
+    const reducedMotion = prefersReducedMotion();
 
-    const baseStyles = 'w-full rounded-base border-2 bg-bg-secondary text-text-primary placeholder-text-tertiary resize-none transition-colors duration-200';
+    const baseStyles = 'w-full rounded-base border-2 bg-bg-secondary text-text-primary placeholder-text-tertiary resize-none';
     const borderStyle = error
       ? 'border-error focus:border-error focus:outline-none'
       : 'border-border-light focus:border-primary focus:outline-none focus:shadow-md';
@@ -134,14 +160,14 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="w-full">
         {label && (
-          <label
-            className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
-              isFocused ? 'text-primary' : 'text-text-primary'
-            }`}
+          <motion.label
+            className="block text-sm font-medium text-text-primary mb-2"
+            animate={{ color: isFocused ? '#d4af37' : '#ffffff' }}
+            transition={{ duration: reducedMotion ? 0.01 : 0.15 }}
           >
             {label}
             {props.required && <span className="text-error ml-1">*</span>}
-          </label>
+          </motion.label>
         )}
         <textarea
           ref={ref}
@@ -152,14 +178,24 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           {...props}
         />
         {error && (
-          <p className="text-error text-sm mt-1">
+          <motion.p
+            className="text-error text-sm mt-1"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: reducedMotion ? 0.01 : 0.2 }}
+          >
             {error}
-          </p>
+          </motion.p>
         )}
         {helperText && !error && (
-          <p className="text-text-tertiary text-sm mt-1">
+          <motion.p
+            className="text-text-tertiary text-sm mt-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: reducedMotion ? 0.01 : 0.3 }}
+          >
             {helperText}
-          </p>
+          </motion.p>
         )}
       </div>
     );

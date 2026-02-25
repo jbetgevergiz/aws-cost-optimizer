@@ -16,7 +16,7 @@ export { ProgressBar, IndeterminateProgressBar } from './ProgressBar';
 
 // Data update animations
 export { CostTicker, NumberCounter } from './CostTicker';
-export { PulseAnimation, StaggeredSavingsList } from './SavingsAnimation';
+export { SavingsAnimation, PulseAnimation, StaggeredSavingsList } from './SavingsAnimation';
 
 // Form validations
 export { ValidationError, SuccessMessage, ValidatedField } from './FormValidation';
@@ -37,4 +37,4 @@ export { DashboardSidebar } from './layout/DashboardSidebar';
 
 // 3D Components
 export { CostVisualization } from './3d/CostVisualization';
-export { SavingsAnimation } from './3d/SavingsAnimation';
+export { SavingsAnimation as SavingsAnimation3D } from './3d/SavingsAnimation';
