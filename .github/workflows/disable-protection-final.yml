@@ -1,0 +1,74 @@
+name: Disable Protection - Final Attempt
+
+on:
+  workflow_dispatch:
+
+jobs:
+  disable:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get current project protection status
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "=== Current Status ===" 
+          curl -s -X GET "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" | jq '.protection // .protectionBypass // "no protection field found"'
+      
+      - name: Attempt 1 - Disable via protection field = null
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "=== Disabling protection (attempt 1) ===" 
+          curl -X PATCH "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"protection":null}' \
+            -w "\nHTTP: %{http_code}\n" | jq . || true
+      
+      - name: Attempt 2 - Add to unprotected domains
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "=== Adding domain to exceptions (attempt 2) ===" 
+          curl -X POST "https://api.vercel.com/v14/projects/$VERCEL_PROJECT_ID/protection/unprotected-domains" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"domain":"frontend-hr3ntphz4-jasons-projects-c908ddc9.vercel.app"}' \
+            -w "\nHTTP: %{http_code}\n" | jq . || true
+      
+      - name: Attempt 3 - Direct v10 endpoint
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "=== Using v10 endpoint (attempt 3) ===" 
+          curl -X PATCH "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"protectionBypass":""}' \
+            -w "\nHTTP: %{http_code}\n" | jq . || true
+      
+      - name: Check final status
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "=== Final Status ===" 
+          curl -s -X GET "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" | jq '.' | head -80
+      
+      - name: Test app access
+        run: |
+          echo "=== Testing app access ===" 
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://frontend-hr3ntphz4-jasons-projects-c908ddc9.vercel.app)
+          echo "HTTP Code: $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✓ SUCCESS - App is now accessible!"
+          else
+            echo "✗ FAILED - App still protected (Code: $HTTP_CODE)"
+          fi
